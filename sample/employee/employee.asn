@@ -1,0 +1,28 @@
+Employee DEFINITIONS ::= BEGIN
+EXPORTS;
+
+PersonnelRecord ::= [APPLICATION 0] IMPLICIT SET {
+			Name,
+   title	[0]	IA5String,
+   number		EmployeeNumber,
+   dateOfHire	[1]	Date,
+   nameOfSpouse [2]	Name,
+   children	[3]	IMPLICIT SEQUENCE OF ChildInformation
+}
+
+ChildInformation ::= SET {
+   Name,
+   dateOfBirth [0] Date
+}
+
+Name ::= [APPLICATION 1] IMPLICIT SEQUENCE {
+   givenName	IA5String,
+   initial	IA5String,
+   familyName	IA5String
+}
+
+EmployeeNumber ::= [APPLICATION 2] IMPLICIT INTEGER
+
+Date ::= IA5String
+
+END
