@@ -1,0 +1,65 @@
+   EncryptedKeyPackageModuleV1
+     { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9)
+       smime(16) modules(0) id-mod-encryptedKeyPkgV1(51) }
+
+   DEFINITIONS IMPLICIT TAGS ::=
+
+   BEGIN
+
+   -- EXPORTS ALL --
+
+   IMPORTS
+
+   -- From New SMIME ASN.1 [RFC5911]
+
+   EncryptedData, EnvelopedData, CONTENT-TYPE
+     FROM CryptographicMessageSyntax-2010
+       { iso(1) member-body(2) us(840) rsadsi(113549)
+         pkcs(1) pkcs-9(9) smime(16) modules(0) id-mod-cms-2009(58) }
+
+   -- From New SMIME ASN.1 [RFC5911]
+
+   AuthEnvelopedData
+     FROM CMS-AuthEnvelopedData-2010
+        { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9)
+      smime(16) modules(0) id-mod-cmsAuthEnvData-2009(57) }
+
+   -- From New PKIX ASN.1 [RFC5912]
+
+   ATTRIBUTE
+     FROM PKIX-CommonTypes-2009
+       { iso(1) identified-organization(3) dod(6) internet(1)
+         security(5) mechanisms(5) pkix(7) id-mod(0)
+         id-mod-pkixCommon-02(57) }
+
+   ;
+
+   ContentSet CONTENT-TYPE ::= {
+     ct-encrypted-key-package,
+     ... -- Expect additional content types --
+   }
+
+   ct-encrypted-key-package CONTENT-TYPE ::=
+       { TYPE EncryptedKeyPackage
+         IDENTIFIED BY id-ct-KP-encryptedKeyPkg }
+
+   id-ct-KP-encryptedKeyPkg OBJECT IDENTIFIER ::=
+     { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101)
+       dod(2) infosec(1) formats(2) key-package-content-types(78) 2 }
+
+   EncryptedKeyPackage ::= CHOICE {
+       encrypted        EncryptedData,
+       enveloped        [0] EnvelopedData,
+       authEnveloped    [1] AuthEnvelopedData }
+
+   aa-content-decrypt-key-identifier ATTRIBUTE ::= {
+       TYPE          ContentDecryptKeyID
+       IDENTIFIED BY id-aa-KP-contentDecryptKeyID }
+
+   id-aa-KP-contentDecryptKeyID OBJECT IDENTIFIER ::= {
+     joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101)
+     dod(2) infosec(1) attributes(5) 66 }
+
+   ContentDecryptKeyID ::= OCTET STRING
+
+   END

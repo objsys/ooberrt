@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1997-2016 by Objective Systems, Inc.
+ * Copyright (c) 1997-2025 by Objective Systems, Inc.
  * http://www.obj-sys.com
  *
  * This software is furnished under an open source license and may be
@@ -192,7 +192,7 @@ void rtxPrintNVP (const char* name, const OSUTF8NVP* pnvp)
 void rtxPrintHexBinary
 (const char* name, size_t numocts, const OSOCTET* data)
 {
-   printf ("%s.numocts = %u\n", name, numocts);
+   printf ("%s.numocts = %zu\n", name, numocts);
    printf ("%s.data = \n", name);
    rtxHexDump (data, numocts);
 }
@@ -278,9 +278,9 @@ static void rtBitStringDump (OSSIZE numbits, const OSOCTET* data)
 }
 
 void rtPrintBitStr (const char* name, OSSIZE numbits,
-                                const OSOCTET* data, const char* conn)
+                    const OSOCTET* data, const char* conn)
 {
-   printf ("%s%snumbits = %u\n", name, conn, numbits);
+   printf ("%s%snumbits = %zu\n", name, conn, numbits);
    printf ("%s%sdata = ", name, conn);
    rtBitStringDump (numbits, data);
    printf ("\n");
@@ -289,15 +289,15 @@ void rtPrintBitStr (const char* name, OSSIZE numbits,
 void rtPrintBitStrBraceText
 (const char* name, OSSIZE numbits, const OSOCTET* data)
 {
-   printf ("%s = { %u, ", name, numbits);
+   printf ("%s = { %zu, ", name, numbits);
    rtBitStringDump (numbits, data);
    printf (" }\n");
 }
 
 void rtPrintOctStr (const char* name, OSSIZE numocts,
-                                const OSOCTET* data, const char* conn)
+                    const OSOCTET* data, const char* conn)
 {
-   printf ("%s%snumocts = %u\n", name, conn, numocts);
+   printf ("%s%snumocts = %zu\n", name, conn, numocts);
    printf ("%s%sdata = \n", name, conn);
    rtxHexDump (data, numocts);
 }
@@ -319,16 +319,27 @@ void rtPrint32BitCharStr
 
 void rtPrintOID (const char* name, const ASN1OBJID* pOID)
 {
-   printf ("%s = ", name);
-   rtPrintOIDValue (pOID);
+   rtPrintOID2(name, pOID->numids, pOID->subid);
 }
 
 void rtPrintOIDValue (const ASN1OBJID* pOID)
 {
-   OSUINT32 ui;
+   rtPrintOIDValue2(pOID->numids, pOID->subid);
+}
+
+void rtPrintOID2
+(const char* name, OSSIZE numids, const OSUINT32* subidArray)
+{
+   printf ("%s = ", name);
+   rtPrintOIDValue2 (numids, subidArray);
+}
+
+void rtPrintOIDValue2 (OSSIZE numids, const OSUINT32* subidArray)
+{
+   OSSIZE ui;
    printf ("{ ");
-   for (ui = 0; ui < pOID->numids; ui++) {
-      printf ("%d ", pOID->subid[ui]);
+   for (ui = 0; ui < numids; ui++) {
+      printf ("%d ", subidArray[ui]);
    }
    printf ("}\n");
 }
@@ -336,7 +347,7 @@ void rtPrintOIDValue (const ASN1OBJID* pOID)
 void rtPrintOpenType (const char* name, OSSIZE numocts,
                       const OSOCTET* data, const char*  conn)
 {
-   printf ("%s%snumocts = %u\n", name, conn, numocts);
+   printf ("%s%snumocts = %zu\n", name, conn, numocts);
    printf ("%s%sdata = \n", name, conn);
    rtxHexDump (data, numocts);
 }

@@ -1,0 +1,106 @@
+-- This file contains a sample of all types supported in the open source
+-- runtime.
+AllTypes DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+EXPORTS;
+
+divorcedval INTEGER ::= 100
+
+EnumType ::= ENUMERATED {
+   married(0), single(1), divorced(divorcedval), children(1000)
+}
+
+BS3 ::= BIT STRING { zero(0), a(1), b(3), c(5) }
+BITS ::= BIT STRING
+BMPS ::= BMPString
+Unis ::= UniversalString
+
+CS ::= IA5String
+CS1 ::= CS
+
+OS ::= OCTET STRING
+OS1 ::= OS
+
+oid OBJECT IDENTIFIER ::= { 1 2 100000 4 5 6 }
+
+ChoiceType ::= CHOICE {
+   e1 INTEGER,
+   e2 IA5String,
+   e3 Name
+}
+
+SequenceType ::= [APPLICATION 0] SEQUENCE {
+   utc          UTCTime,
+   utc1         UTCTime,
+   gtc          GeneralizedTime,
+   gtc1         GeneralizedTime,
+
+   nullval      NULL,
+
+   bs0          BIT STRING,
+   bs1          BIT STRING { zero(0), a(1), b(3), c(5) },
+   bs2          BIT STRING,
+   bs3          BS3,
+   bs4          BITS OPTIONAL,
+
+   cs           CS1,
+   vids         VideotexString OPTIONAL,
+   viss         VisibleString OPTIONAL,
+   gras         GraphicString OPTIONAL,
+   gens         GeneralString OPTIONAL,
+   unis         UniversalString,
+   bmps         BMPString,
+   bmps2        BMPS OPTIONAL,
+   utf8         UTF8String OPTIONAL,
+
+   os           OCTET STRING,
+   os1          OS1 OPTIONAL,
+
+   val1         INTEGER { value3 (22) } (0..MAX),
+   val2         INTEGER { value2 (22) } (2..MAX),
+
+   enum         ENUMERATED { yes(1), no(0) },
+
+   boolean      BOOLEAN,
+
+   oid          OBJECT IDENTIFIER,
+
+   name         Name,
+   child        ChildInformation,
+
+   set          SET OF ChoiceType OPTIONAL,
+
+   -- Different cases of SEQUENCE OF
+   seqofEnum    SEQUENCE OF EnumType,
+
+   bsseqof1     SEQUENCE OF BIT STRING,
+   bsseqof2     SEQUENCE OF BIT STRING { zero1(0), a1(1), b1(3), c1(5) },
+   osseqof1     SEQUENCE OF OCTET STRING,
+   csseqof1     SEQUENCE OF IA5String,
+
+   bseqof       SEQUENCE OF BOOLEAN,
+
+   iseqof       SEQUENCE OF INTEGER { value1 (1), value2 (2) } (0..10),
+   iseqof1      SEQUENCE OF INTEGER,
+   iseqof2      SEQUENCE (SIZE (1..10)) OF INTEGER,
+
+   seqofChoice  SEQUENCE OF ChoiceType,
+
+   children     SEQUENCE OF ChildInformation,
+
+   ...
+}
+
+ChildInformation ::= SET {
+   name            Name,
+   dateOfBirth [0] Date
+}
+
+Name ::= [APPLICATION 1] IMPLICIT SEQUENCE {
+   givenName   IA5String,
+   initial     IA5String,
+   familyName  IA5String
+}
+
+Date ::= IA5String
+
+END

@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 1997-2016 by Objective Systems, Inc.
- * http://www.obj-sys.com
+ * Copyright (c) 1997-2025 by Objective Systems, Inc.
+ * https://obj-sys.com
  *
  * This software is furnished under an open source license and may be
  * used and copied only in accordance with the terms of this license.
@@ -8,7 +8,7 @@
  * directory of this installation in the COPYING file.  It
  * can also be viewed online at the following URL:
  *
- *   http://www.obj-sys.com/open/lgpl2.html
+ *   https://obj-sys.com/open/lgpl2.html
  *
  * Any redistributions of this file including modified versions must
  * maintain this copyright notice.
@@ -88,7 +88,10 @@
 rtxErrSetData(pctxt,stat,__FILE__,__LINE__)
 
 #define LOG_RTERRNEW(pctxt,stat) \
-rtxErrSetNewData(pctxt,stat,__FILE__,__LINE__)
+rtxErrSetData(pctxt,stat,__FILE__,__LINE__)
+
+#define rtxErrGetStatus(pctxt) pctxt->errInfo.status
+#define rtxErrSetNonFatal(pctxt) stat=pctxt->errInfo.status
 
 #ifndef EXTERNRT
 #ifdef ASN1DLL
@@ -149,6 +152,10 @@ rtxErrSetNewData(pctxt,stat,__FILE__,__LINE__)
 
 #define OS_TOLOWER(c) (OS_ISUPPER(c) ? (c) - 'A' + 'a' : (c))
 #define OS_TOUPPER(c) (OS_ISLOWER(c) ? (c) - 'a' + 'A' : (c))
+
+/* Min/max tests */
+#define OS_MAX(a,b) (((a)>(b))?(a):(b))
+#define OS_MIN(a,b) (((a)<(b))?(a):(b))
 
 #ifdef __cplusplus
 extern "C" {
@@ -477,6 +484,18 @@ EXTERNRT OSBOOL rtxErrAddElemNameParm (OSCTXT* pctxt);
 EXTERNRT int rtxErrAddStrParm (OSCTXT* pctxt, const char* errprm_p);
 
 /**
+ * This function checks the context structure for non-fatal errors.  If any
+ * such errors are found, the function will return the error status if they
+ * are all the same error.  If there are at least two different error
+ * conditions, the function will return RTERR_MULTIPLE.  If there are no
+ * error conditions, the function will return zero.
+ * 
+ * @param pctxt        A pointer to a context structure.
+ * @return             An error status or zero.
+ */
+EXTERNRT int rtxErrCheckNonFatal(OSCTXT* pctxt);
+
+/**
  * This function frees memory associated with the storage of parameters
  * associated with an error message. These parameters are maintained on an
  * internal linked list maintained within the error information structure. The
@@ -577,6 +596,9 @@ if (((pseqof)->elem = (type*) rtxMemAlloc \
 (pctxt, sizeof(type)*(pseqof)->n)) == 0) return RTERR_NOMEM; \
 } while (0)
 
+#define rtxMemAllocArray(pctxt,numElem,elemType) \
+rtxMemAlloc(pctxt, numElem*sizeof(elemType));
+   
 /**
  * Get array size. This macro returns the number of elements in an array.
  *
@@ -808,50 +830,6 @@ EXTERNRT const char* rtUCSToCString
 EXTERNRT int rtValidateStr (OSUINT32 tag, const char *pdata);
 
 /**
- * @defgroup rtxEnum Enumeration utility functions
- * @{
- * Enumeration utility function provide run-time functions for handling
- * enumerations defined within a schema.
- */
-typedef struct OSEnumItem {
-   const OSUTF8CHAR* name;
-   OSINT32           value;
-   OSUINT16          namelen;
-   OSUINT16          transidx;
-} OSEnumItem;
-
-/**
- * This function will return the numeric value for the given enumerated
- * identifier string.
- *
- * @param strValue Enumerated identifier value
- * @param strValueSize Length of enumerated identifier
- * @param enumTable Table containing the defined enumeration
- * @param enumTableSize Number of rows in the table
- * @return Index to enumerated item if found; otherwise, negative
- *   status code (RTERR_INVENUM).
- */
-EXTERNRT OSINT32 rtxLookupEnum
-(const OSUTF8CHAR* strValue, size_t strValueSize,
- const OSEnumItem enumTable[], OSUINT16 enumTableSize);
-
-/**
- * Lookup enum by integer value.  Required for ASN.1 because enumerated
- * values do not need to be sequential.
- *
- * @param value  Integer value of the enumerated item.
- * @param enumTable Table containing the defined enumeration
- * @param enumTableSize Number of rows in the table
- * @return Index to enumerated item if found; otherwiae, negative
- *   status code (RTERR_INVENUM).
- */
-EXTERNRT OSINT32 rtxLookupEnumByValue
-(OSINT32 value, const OSEnumItem enumTable[], size_t enumTableSize);
-
-/**
- * @} rtxEnum
- */
-/**
  * This function compares two OID values for equality.
  *
  * @param pOID1         Pointer to first OID value to compare.
@@ -981,13 +959,6 @@ EXTERNRT int rtParseGeneralizedTime
 
 EXTERNRT int rtParseUTCTime
 (OSCTXT *pctxt, const char* value, OSNumDateTime* dateTime);
-
-EXTERNRT int rtxUIntToCharStr
-(OSUINT32 value, char* dest, size_t bufsiz, char padchar);
-
-EXTERNRT const char* rtxStrJoin
-(char* dest, size_t bufsiz, const char* str1, const char* str2,
- const char* str3, const char* str4, const char* str5);
 
 /**
  * @} ccfDateTime

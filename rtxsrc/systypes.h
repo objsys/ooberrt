@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1997-2016 by Objective Systems, Inc.
+ * Copyright (c) 1997-2025 by Objective Systems, Inc.
  * http://www.obj-sys.com
  *
  * This software is furnished under an open source license and may be
@@ -114,9 +114,9 @@ typedef struct OSNumDateTime {
 #elif defined(INT64_MAX) /* assume have ISO C99 standard types */
 #define OSINT64  int64_t
 #define OSUINT64 uint64_t
-#define OSINT64FMT  "%lld"
-#define OSUINT64FMT "%llu"
-#define OSINT64FMTX "%llx"
+#define OSINT64FMT  "%ld"
+#define OSUINT64FMT "%lu"
+#define OSINT64FMTX "%lx"
 #define OSINT64MAX  INT64_MAX
 #define OSUINT64MAX UINT64_MAX
 #define OSINT64MIN  INT64_MIN

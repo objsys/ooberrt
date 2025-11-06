@@ -1,0 +1,1 @@
+c:\asn1c_v65x\dev\bin\asn1c ../../RedHoundBER/modules/*.asn -pdu * -c++ -o ..\src -der -genfree -genBitMacros -hdrGuardPfx -cppNs rhsec_der -warnings -hFile ridgeback_der.h -config ridgeback_config_der.xml -table-unions -nodatestamp -nortkey

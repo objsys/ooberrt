@@ -1,0 +1,94 @@
+   DSSC {iso(1) identified-organization(3) dod(6)
+            internet(1) security(5) mechanisms(5)
+            ltans(11) id-mod(0) id-mod-dssc(7) id-mod-dssc-v1(1) }
+
+   DEFINITIONS IMPLICIT TAGS ::=
+   BEGIN
+
+   -- EXPORT ALL --
+
+   IMPORTS
+
+   -- Import from RFC 5652 [RFC5652]
+   ContentInfo FROM CryptographicMessageSyntax-2010
+      { iso(1) member-body(2) us(840) rsadsi(113549)
+         pkcs(1) pkcs-9(9) smime(16) modules(0) id-mod-cms-2009(58) }
+   ;
+
+   SecuritySuitabilityPolicy ::= ContentInfo
+
+   -- contentType is id-signedData as defined in [RFC5652]
+   -- content is SignedData as defined in [RFC5652]
+   -- eContentType within SignedData is id-ct-dssc
+   -- eContent within SignedData is TBSPolicy
+
+   id-ct-dssc  OBJECT IDENTIFIER ::= {
+               iso(1) identified-organization(3) dod(6)
+               internet(1) security(5) mechanisms(5)
+               ltans(11) id-ct(1) id-ct-dssc-tbsPolicy(6) }
+
+   TBSPolicy ::= SEQUENCE {
+        version          INTEGER               DEFAULT   {v1(1)},
+        language         UTF8String            DEFAULT   "en",
+        policyName       PolicyName,
+        publisher        Publisher,
+        policyIssueDate  GeneralizedTime,
+        nextUpdate       GeneralizedTime       OPTIONAL,
+        usage            UTF8String            OPTIONAL,
+        algorithms       SEQUENCE OF Algorithm
+   }
+
+   PolicyName ::= SEQUENCE {
+        name  UTF8String,
+        oid   OBJECT IDENTIFIER OPTIONAL,
+        uri   IA5String         OPTIONAL
+   }
+
+   Publisher ::= SEQUENCE {
+        name         UTF8String,
+        address  [0] UTF8String  OPTIONAL,
+        uri      [1] IA5String   OPTIONAL
+   }
+
+   Algorithm ::= SEQUENCE {
+        algorithmIdentifier     AlgID,
+        evaluations             SEQUENCE OF Evaluation,
+        information         [0] SEQUENCE OF UTF8String  OPTIONAL,
+        other               [1] Extension               OPTIONAL
+   }
+
+   Extension ::= SEQUENCE {
+        extensionType  EXTENSION-TYPE.&id ({SupportedExtensions}),
+        extension      EXTENSION-TYPE.&Type
+                            ({SupportedExtensions}{@extensionType})
+   }
+
+   EXTENSION-TYPE ::= TYPE-IDENTIFIER
+
+   SupportedExtensions EXTENSION-TYPE ::= {...}
+
+   AlgID ::= SEQUENCE {
+        name      UTF8String,
+        oid   [0] SEQUENCE OF OBJECT IDENTIFIER,
+        uri   [1] SEQUENCE OF IA5String          OPTIONAL
+   }
+
+   Evaluation ::= SEQUENCE {
+        parameters           [0] SEQUENCE OF Parameter OPTIONAL,
+        validity             [1] Validity,
+        other                [2] Extension             OPTIONAL
+   }
+
+   Parameter ::= SEQUENCE {
+        name       UTF8String,
+        min    [0] INTEGER     OPTIONAL,
+        max    [1] INTEGER     OPTIONAL,
+        other  [2] Extension   OPTIONAL
+   }
+
+   Validity ::= SEQUENCE {
+        start  [0] GeneralizedTime OPTIONAL,
+        end    [1] GeneralizedTime OPTIONAL
+   }
+
+   END

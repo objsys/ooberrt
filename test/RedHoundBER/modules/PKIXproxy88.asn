@@ -1,0 +1,51 @@
+   PKIXproxy88 { iso(1) identified-organization(3) dod(6)
+       internet(1) security(5) mechanisms(5) pkix(7) id-mod(0)
+       proxy-cert-extns(25) }
+
+   DEFINITIONS EXPLICIT TAGS ::=
+
+   BEGIN
+
+   -- EXPORTS ALL --
+
+   -- IMPORTS NONE --
+   IMPORTS
+   id-pkix, id-pe
+   FROM PKIX1Explicit-2009
+       {iso(1) identified-organization(3) dod(6) internet(1) security(5)
+       mechanisms(5) pkix(7) id-mod(0) id-mod-pkix1-explicit-02(51)} ;
+
+   -- PKIX specific OIDs
+
+   --id-pkix OBJECT IDENTIFIER ::=
+   --        { iso(1) identified-organization(3)
+   --             dod(6) internet(1) security(5) mechanisms(5) pkix(7) }
+
+   -- private certificate extensions
+   --id-pe   OBJECT IDENTIFIER ::= { id-pkix 1 }
+
+   -- Locally defined OIDs
+
+   -- The proxy certificate extension
+   id-pe-proxyCertInfo    OBJECT IDENTIFIER ::= { id-pe 14 }
+
+   -- Proxy certificate policy languages
+   id-ppl  OBJECT IDENTIFIER ::= { id-pkix 21 }
+
+   -- Proxy certificate policies languages defined in
+   id-ppl-anyLanguage     OBJECT IDENTIFIER ::= { id-ppl 0 }
+   id-ppl-inheritAll      OBJECT IDENTIFIER ::= { id-ppl 1 }
+   id-ppl-independent     OBJECT IDENTIFIER ::= { id-ppl 2 }
+
+   -- The ProxyCertInfo Extension
+   ProxyCertInfoExtension  ::= SEQUENCE {
+         pCPathLenConstraint     ProxyCertPathLengthConstraint
+                                       OPTIONAL,
+         proxyPolicy             ProxyPolicy }
+
+   ProxyCertPathLengthConstraint  ::= INTEGER
+   ProxyPolicy  ::= SEQUENCE {
+         policyLanguage          OBJECT IDENTIFIER,
+         policy                  OCTET STRING OPTIONAL }
+
+   END

@@ -1,0 +1,67 @@
+   TrustAnchorInfoModule
+   { joint-iso-itu-t(2) country(16) us(840) organization(1)
+      gov(101) dod(2) infosec(1) modules(0) 33 }
+
+   DEFINITIONS IMPLICIT TAGS ::=
+   BEGIN
+
+   IMPORTS
+   Certificate, Name, SubjectPublicKeyInfo, TBSCertificate
+   FROM PKIX1Explicit-2009 -- from [RFC5912]
+       {iso(1) identified-organization(3) dod(6) internet(1) security(5)
+       mechanisms(5) pkix(7) id-mod(0) id-mod-pkix1-explicit-02(51)}
+   CertificatePolicies, KeyIdentifier, NameConstraints
+   FROM PKIX1Implicit-2009 -- from [RFC5912]
+       {iso(1) identified-organization(3) dod(6) internet(1) security(5)
+       mechanisms(5) pkix(7) id-mod(0) id-mod-pkix1-implicit-02(59)}
+CONTENT-TYPE
+      FROM CryptographicMessageSyntax-2010 -- from [RFC5911]
+         { iso(1) member-body(2) us(840) rsadsi(113549)
+         pkcs(1) pkcs-9(9) smime(16) modules(0) id-mod-cms-2009(58) }	   
+   Extensions{}
+   FROM PKIX-CommonTypes-2009 -- from [RFC5912]
+       { iso(1) identified-organization(3) dod(6) internet(1)
+       security(5) mechanisms(5) pkix(7) id-mod(0)
+       id-mod-pkixCommon-02(57) }         ;
+
+   TrustAnchorInfo ::= SEQUENCE {
+      version   TrustAnchorInfoVersion DEFAULT v1,
+      pubKey    SubjectPublicKeyInfo,
+      keyId     KeyIdentifier,
+      taTitle   TrustAnchorTitle OPTIONAL,
+      certPath  CertPathControls OPTIONAL,
+      exts      [1] EXPLICIT Extensions {{...}}   OPTIONAL,
+      taTitleLangTag   [2] UTF8String OPTIONAL }
+
+   TrustAnchorInfoVersion ::= INTEGER { v1(1) }
+
+   TrustAnchorTitle ::= UTF8String (SIZE (1..64))
+
+   CertPathControls ::= SEQUENCE {
+     taName           Name,
+     certificate      [0] Certificate OPTIONAL,
+     policySet        [1] CertificatePolicies OPTIONAL,
+     policyFlags      [2] CertPolicyFlags OPTIONAL,
+     nameConstr       [3] NameConstraints OPTIONAL,
+     pathLenConstraint[4] INTEGER (0..MAX) OPTIONAL}
+
+   CertPolicyFlags ::= BIT STRING {
+     inhibitPolicyMapping    (0),
+     requireExplicitPolicy   (1),
+     inhibitAnyPolicy        (2) }
+
+   TrustAnchorList ::= SEQUENCE SIZE (1..MAX) OF TrustAnchorChoice
+
+   TrustAnchorChoice ::= CHOICE {
+     certificate  Certificate,
+     tbsCert      [1] EXPLICIT TBSCertificate,
+     taInfo       [2] EXPLICIT TrustAnchorInfo }
+
+   id-ct-trustAnchorList      OBJECT IDENTIFIER ::= { iso(1)
+       member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9)
+       smime(16) id-ct(1) 34 }
+
+   trust-anchor-list CONTENT-TYPE ::=
+       { TYPE TrustAnchorList IDENTIFIED BY id-ct-trustAnchorList }
+
+   END

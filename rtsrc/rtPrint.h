@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1997-2016 by Objective Systems, Inc.
+ * Copyright (c) 1997-2025 by Objective Systems, Inc.
  * http://www.obj-sys.com
  *
  * This software is furnished under an open source license and may be
@@ -55,6 +55,9 @@ extern "C" {
  */
 EXTERNRT void rtPrintBitStr (const char* name, OSSIZE numbits,
                               const OSOCTET* data, const char* conn);
+
+#define rtPrintBitStrNamed(pctxt,numbits,data,conn,nb,pos,bn) \
+rtPrintBitStr(name,numbits,data,conn)
 
 /**
  * This function prints the value of a bit string to stdout in brace text
@@ -130,6 +133,31 @@ EXTERNRT void rtPrintOID (const char* name, const ASN1OBJID* pOID);
  * @param pOID         A pointer to the OID to be printed.
  */
 EXTERNRT void rtPrintOIDValue (const ASN1OBJID* pOID);
+
+/**
+ * This function prints the value of an object identifier to stdout.
+ * This version allows the number of sub-identifiers and array of
+ * subidentifiers to be passed in separately allowing it to be used
+ * for both static and dynamic OID structures.
+ *
+ * @param name         The name of the variable to print.
+ * @param numids       Number of sub-identifiers
+ * @param subidArray   Pointer to array of sub-identifiers.
+ */
+EXTERNRT void rtPrintOID2
+(const char* name, OSSIZE numids, const OSUINT32* subidArray);
+
+/**
+ * This function prints the value of an object identifier
+ * to stdout.  Only the value is printed, not the name.
+ * This version allows the number of sub-identifiers and array of
+ * subidentifiers to be passed in separately allowing it to be used
+ * for both static and dynamic OID structures.
+ *
+ * @param numids       Number of sub-identifiers
+ * @param subidArray   Pointer to array of sub-identifiers.
+ */
+EXTERNRT void rtPrintOIDValue2 (OSSIZE numids, const OSUINT32* subidArray);
 
 /**
  * This function prints the value of an open type to stdout.

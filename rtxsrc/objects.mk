@@ -1,5 +1,6 @@
 RTXOBJECTS = \
 $(OBJDIR)$(PS)base64$(OBJ) \
+$(OBJDIR)$(PS)charstr$(OBJ) \
 $(OBJDIR)$(PS)context$(OBJ) \
 $(OBJDIR)$(PS)datetime$(OBJ) \
 $(OBJDIR)$(PS)dlist$(OBJ) \

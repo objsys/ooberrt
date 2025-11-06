@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1997-2016 by Objective Systems, Inc.
+ * Copyright (c) 1997-2025 by Objective Systems, Inc.
  * http://www.obj-sys.com
  *
  * This software is furnished under an open source license and may be
@@ -574,6 +574,24 @@ int xe_enum (OSCTXT* pctxt, OSINT32 *pvalue, ASN1TagType tagging)
    return (aal);
 }
 
+int xe_enumInt8 (OSCTXT* pctxt, OSINT8 *object_p, ASN1TagType tagging)
+{
+   if (object_p) {
+      OSINT32 tmp = *object_p;
+      return xe_enum (pctxt, &tmp, tagging);
+   }
+   return LOG_RTERR(pctxt, RTERR_BADVALUE);
+}
+
+int xe_enumInt16 (OSCTXT* pctxt, OSINT16 *object_p, ASN1TagType tagging)
+{
+   if (object_p) {
+      OSINT32 tmp = *object_p;
+      return xe_enum (pctxt, &tmp, tagging);
+   }
+   return LOG_RTERR(pctxt, RTERR_BADVALUE);
+}
+
 int xe_enumUnsigned (OSCTXT* pctxt, OSUINT32 *object_p, ASN1TagType tagging)
 {
    int aal;
@@ -589,6 +607,24 @@ int xe_enumUnsigned (OSCTXT* pctxt, OSUINT32 *object_p, ASN1TagType tagging)
    }
 
    return (aal);
+}
+
+int xe_enumUInt8 (OSCTXT* pctxt, OSUINT8 *object_p, ASN1TagType tagging)
+{
+   if (object_p) {
+      OSUINT32 tmp = *object_p;
+      return xe_enumUnsigned (pctxt, &tmp, tagging);
+   }
+   return LOG_RTERR(pctxt, RTERR_BADVALUE);
+}
+
+int xe_enumUInt16 (OSCTXT* pctxt, OSUINT16 *object_p, ASN1TagType tagging)
+{
+   if (object_p) {
+      OSUINT32 tmp = *object_p;
+      return xe_enumUnsigned (pctxt, &tmp, tagging);
+   }
+   return LOG_RTERR(pctxt, RTERR_BADVALUE);
 }
 
 void xe_free (OSCTXT* pctxt)

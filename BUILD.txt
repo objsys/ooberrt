@@ -1,0 +1,50 @@
+The ooberrt (Objective Open BER Run-time) add-on is built and tested using the
+following procedures.  The add-on is only supported for Windows and Linux.
+
+
+=== CREATING OOBERRT ADD-ON KIT ===
+
+The ooberrt kit can be created on any Windows or Linux system containing the
+necessary branch or dev ASN1C workspace.  A standard Windows command prompt
+or Linux terminal window is sufficient.
+
+1. Begin with a clean copy of the ooberrt directory:
+
+If creating the kit in a branch, do the following:
+    a. In Perforce, right click on the ooberrt directory and select "Remove
+       from Workspace".
+    b. In the terminal window or using Windows Explorer, delete the ooberrt
+       directory.
+    c. In Perforce, select "Get Latest Revision" to obtain a new clean ooberrt
+       directory.
+
+If creating the kit in dev, do the following:
+    a. From the dev directory, delete the ooberrt directory.
+    b. Clone the ooberrt directory:
+        git clone https://github.com/objsys/ooberrt
+
+2. Change directory to the ooberrt directory and create the kit:
+    perl mkkit.pl
+
+This will create a ooberrt.zip file in the ooberrt directory.
+
+3. Test the kit using the test steps below.
+
+4. Once testing is successful, copy the kit to leda2 at
+/media/eday/OSysBackups/sync/kits/asn1api_kits/ooberrt.  Also upload the kit
+to the web server at /home/objsys/public_html/products/opensource.
+
+
+=== TESTING OOBERRT ADD-ON KIT ===
+
+The kit should be tested on both Windows and Linux.
+
+1. Copy the kit to the root directory of an ASN1C installation and unzip the
+archive.
+
+2. Build the ooberrt library according to the steps in the ooberrt/README.txt
+file.
+
+3. Change directory to the sample/employee directory and use make or nmake to
+build the sample.  Confirm the writer and reader are successful.
+

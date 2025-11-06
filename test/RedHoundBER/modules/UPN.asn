@@ -1,0 +1,19 @@
+   UPN {iso(1) identified-organization(3) 
+    dod(6) internet(1) private(4) enterprise(1) redhound(37623)
+	id-rhs-mod(0) id-rhs-upn(3) }
+
+   DEFINITIONS IMPLICIT TAGS ::=
+   BEGIN
+
+   -- EXPORT ALL --
+
+   IMPORTS;
+
+   id-userPrincipalName OBJECT IDENTIFIER ::= {
+               iso(1) identified-organization(3) dod(6)
+               internet(1) private(4) enterprise(1)
+               microsoft(311) 20 2 3 }
+
+   UserPrincipalName ::= UTF8String
+   
+   END

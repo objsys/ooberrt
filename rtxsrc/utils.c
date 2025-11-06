@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1997-2016 by Objective Systems, Inc.
+ * Copyright (c) 1997-2025 by Objective Systems, Inc.
  * http://www.obj-sys.com
  *
  * This software is furnished under an open source license and may be
@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "rtxsrc/rtxCommon.h"
+#include "rtxsrc/rtxEnum.h"
 
 /* Compare two OID's for equality */
 
@@ -101,42 +101,3 @@ OSINT32 rtxLookupEnumByValue
    }
    return RTERR_INVENUM;
 }
-
-int rtxUIntToCharStr (OSUINT32 value, char* dest, size_t bufsiz, char padchar)
-{
-#if defined(_MSC_VER)
-   _snprintf_s (dest, bufsiz, _TRUNCATE, "%u", value);
-#else
-   snprintf (dest, bufsiz, "%u", value);
-#endif
-   return 0;
-}
-
-const char* rtxStrJoin
-(char* dest, size_t bufsiz, const char* str1, const char* str2,
- const char* str3, const char* str4, const char* str5)
-{
-   size_t partLen, idx = 0;
-   const char* parts[5];
-   OSUINT32 i;
-
-   parts[0] = str1; parts[1] = str2; parts[2] = str3;
-   parts[3] = str4, parts[4] = str5;
-
-   for (i = 0; i < 5; i++) {
-      if (0 != parts[i]) {
-         partLen = strlen (parts[i]);
-         if ((idx + partLen) < bufsiz) {
-            strcpy (&dest[idx], parts[i]);
-            idx += partLen;
-         }
-         else break;
-      }
-      else break;
-   }
-
-   dest[idx] = '\0';
-
-   return dest;
-}
-

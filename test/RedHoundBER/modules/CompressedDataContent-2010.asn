@@ -1,0 +1,82 @@
+   CompressedDataContent-2010
+      { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9)
+        smime(16) modules(0) id-mod-compressedDataContent(54) }
+
+   DEFINITIONS IMPLICIT TAGS ::=
+   BEGIN
+
+   IMPORTS
+     CMSVersion, EncapsulatedContentInfo,
+     CONTENT-TYPE
+     FROM CryptographicMessageSyntax-2010
+       { iso(1) member-body(2) us(840) rsadsi(113549)
+          pkcs(1) pkcs-9(9) smime(16) modules(0) id-mod-cms-2009(58) }
+
+     AlgorithmIdentifier{}, SMIME-CAPS, ParamOptions, ALGORITHM
+     FROM AlgorithmInformation-2009
+       {iso(1) identified-organization(3) dod(6) internet(1) security(5)
+       mechanisms(5) pkix(7) id-mod(0)
+       id-mod-algorithmInformation-02(58)}
+     ;
+
+     --
+     --  ContentTypes contains the set of content types that are
+     --    defined in this module.
+     --
+     --  The contents of ContentTypes should be added to
+     --    ContentSet defined in [RFC5652]
+     --
+
+     ContentTypes CONTENT-TYPE ::= {ct-compressedData}
+
+     --
+     --  SMimeCaps contains the set of S/MIME capabilities that
+     --    are associated with the algorithms defined in this
+     --    document.
+     --
+     --  SMimeCaps are added to SMimeCapsSet defined in [RFC3851].
+     --
+
+     SMimeCaps SMIME-CAPS ::= {cpa-zlibCompress.&smimeCaps, ...}
+
+     --
+     --  Define the compressed data content type
+     --
+
+     ct-compressedData CONTENT-TYPE ::= {
+       TYPE CompressedData IDENTIFIED BY id-ct-compressedData
+     }
+
+     CompressedData ::= SEQUENCE {
+        version CMSVersion (v0),  -- Always set to 0
+        compressionAlgorithm CompressionAlgorithmIdentifier,
+        encapContentInfo EncapsulatedContentInfo
+     }
+
+     CompressionAlgorithmIdentifier ::=
+        AlgorithmIdentifier{ALGORITHM, {CompressAlgorithmSet}}
+
+     CompressAlgorithmSet ALGORITHM ::= {
+       cpa-zlibCompress, ...
+     }
+
+     -- Algorithm Identifiers
+
+     id-alg-zlibCompress OBJECT IDENTIFIER ::= { iso(1) member-body(2)
+          us(840) rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) alg(3) 8 }
+
+     cpa-zlibCompress ALGORITHM ::= {
+       IDENTIFIER id-alg-zlibCompress
+       PARAMS TYPE NULL ARE preferredAbsent
+       SMIME-CAPS {IDENTIFIED BY id-alg-zlibCompress}
+     }
+
+     -- Content Type Object Identifiers
+
+     id-ct-compressedData OBJECT IDENTIFIER ::= { iso(1) member-body(2)
+          us(840) rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) id-ct(1) 9 }
+
+
+	-- Removed the COMPRESS-ALGORITHM definition to avoid Objective bug
+
+    END

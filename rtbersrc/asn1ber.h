@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1997-2016 by Objective Systems, Inc.
+ * Copyright (c) 1997-2025 by Objective Systems, Inc.
  * http://www.obj-sys.com
  *
  * This software is furnished under an open source license and may be
@@ -756,8 +756,24 @@ int decodeRelOID
 EXTERNRT int xd_enum
 (OSCTXT *pctxt, OSINT32 *pvalue, ASN1TagType tagging, int length);
 
+EXTERNRT int xd_enumInt8
+(OSCTXT *pctxt, OSINT8 *object_p, ASN1TagType tagging, int length);
+
+EXTERNRT int xd_enumInt16
+(OSCTXT *pctxt, OSINT16 *object_p, ASN1TagType tagging, int length);
+
+#define xd_enumInt xd_enum
+
 EXTERNRT int xd_enumUnsigned
 (OSCTXT *pctxt, OSUINT32 *object_p, ASN1TagType tagging, int length);
+
+EXTERNRT int xd_enumUInt8
+(OSCTXT *pctxt, OSUINT8 *object_p, ASN1TagType tagging, int length);
+
+EXTERNRT int xd_enumUInt16
+(OSCTXT *pctxt, OSUINT16 *object_p, ASN1TagType tagging, int length);
+
+#define xd_enumUInt xd_enumUnsigned
 
 /**
  * This function decodes a value of an ASN.1 open type. An open type is used to
@@ -778,7 +794,8 @@ EXTERNRT int xd_OpenType
 (OSCTXT *pctxt, const OSOCTET** pvalue2, OSUINT32* numocts_p);
 
 EXTERNRT int xd_OpenTypeExt
-(OSCTXT* pctxt, ASN1CCB* ccb_p, ASN1TAG tag, OSRTDList *pElemList);
+(OSCTXT* pctxt, ASN1CCB* ccb_p, ASN1TAG* tags, int tagCount,
+ OSRTDList *pElemList);
 
 /**
  * This function sets the decode pointer (cursor) to point at the beginning of
@@ -1466,8 +1483,24 @@ EXTERNRT int encodeRelOID
 EXTERNRT int xe_enum
 (OSCTXT* pctxt, OSINT32 *pvalue, ASN1TagType tagging);
 
+EXTERNRT int xe_enumInt8
+(OSCTXT* pctxt, OSINT8 *object_p, ASN1TagType tagging);
+
+EXTERNRT int xe_enumInt16
+(OSCTXT* pctxt, OSINT16 *object_p, ASN1TagType tagging);
+
+#define xe_enumInt xe_enum
+
 EXTERNRT int xe_enumUnsigned
 (OSCTXT* pctxt, OSUINT32 *object_p, ASN1TagType tagging);
+
+EXTERNRT int xe_enumUInt8
+(OSCTXT* pctxt, OSUINT8 *object_p, ASN1TagType tagging);
+
+EXTERNRT int xe_enumUInt16
+(OSCTXT* pctxt, OSUINT16 *object_p, ASN1TagType tagging);
+
+#define xe_enumUInt xe_enumUnsigned
 
 /**
  * This function will encode a variable of the old (pre- 1994) ASN.1 ANY type

@@ -1,0 +1,66 @@
+   CMSContentConstraintsCertExtn
+     { iso(1) identified-organization(3) dod(6) internet(1) security(5)
+       mechanisms(5) pkix(7) id-mod(0) cmsContentConstr-93(42) }
+
+   DEFINITIONS IMPLICIT TAGS ::= BEGIN
+
+   IMPORTS
+       EXTENSION, ATTRIBUTE
+         FROM  -- from [RFC5912]
+           PKIX-CommonTypes-2009
+               {iso(1) identified-organization(3) dod(6) internet(1)
+               security(5) mechanisms(5) pkix(7) id-mod(0)
+               id-mod-pkixCommon-02(57)}
+
+       CONTENT-TYPE, ContentSet, SignedAttributesSet, ContentType
+       FROM  -- from [RFC5911]
+           CryptographicMessageSyntax-2010
+               { iso(1) member-body(2) us(840) rsadsi(113549)
+         pkcs(1) pkcs-9(9) smime(16) modules(0) id-mod-cms-2009(58) }
+       ;
+
+   id-ct-anyContentType ContentType ::=
+       { iso(1) member-body(2)
+         us(840) rsadsi(113549) pkcs(1) pkcs-9(9) smime(16)
+         id-ct(1) 0 }
+
+   ct-Any CONTENT-TYPE ::= {TYPE NULL IDENTIFIED BY id-ct-anyContentType }
+
+   --
+   --  Add this to CertExtensions in PKIX1Implicit-2009
+   --
+
+   ext-cmsContentConstraints EXTENSION ::= {
+       SYNTAX         CMSContentConstraints
+       IDENTIFIED BY  id-pe-cmsContentConstraints }
+
+   id-pe-cmsContentConstraints OBJECT IDENTIFIER ::=
+       { iso(1) identified-organization(3) dod(6) internet(1)
+         security(5) mechanisms(5) pkix(7) pe(1) 18 }
+
+   CMSContentConstraints ::= SEQUENCE SIZE (1..MAX) OF
+                             ContentTypeConstraint
+
+   ContentTypeGeneration ::= ENUMERATED  {
+       canSource(0),
+       cannotSource(1)}
+
+   ContentTypeConstraint ::= SEQUENCE {
+       contentType           CONTENT-TYPE.&id ({ContentSet|ct-Any,...}),
+       canSource             ContentTypeGeneration DEFAULT canSource,
+       attrConstraints       AttrConstraintList OPTIONAL }
+
+
+   Constraint { ATTRIBUTE:ConstraintList } ::= SEQUENCE {
+       attrType           ATTRIBUTE.
+               &id({ConstraintList}),
+       attrValues         SET SIZE (1..MAX) OF ATTRIBUTE.
+               &Type({ConstraintList}{@attrType})  }
+
+   -- SupportedConstraints ATTRIBUTE ::= {SignedAttributesSet, ... }
+   SupportedConstraints ATTRIBUTE ::= { ... }
+
+   AttrConstraintList ::=
+       SEQUENCE SIZE (1..MAX) OF Constraint {{ SupportedConstraints }}
+
+   END

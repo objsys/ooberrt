@@ -1,0 +1,110 @@
+  CryptographicMessageSyntax-2010-shallow
+       { iso(1) identified-organization(3) dod(6) internet(1) private(4) enterprise(1) redhound(37623) id-rhs-mod(0) 2}
+  DEFINITIONS IMPLICIT TAGS ::=
+  BEGIN
+  IMPORTS
+
+  CONTENT-TYPE, AlgorithmIdentifierType, DigestAlgorithmIdentifier, CMSVersion,
+  CertificateSet, RevocationInfoChoices, SignerInfos, Digest, OriginatorInfo,
+  RecipientInfos, MessageAuthenticationCodeAlgorithm, AuthAttributes,
+  MessageAuthenticationCode, MessageAuthenticationCodeAlgorithmSet,
+  AttributeSet, ContentAttributeSet, SignerIdentifier, Attributes,
+  SignatureAlgorithmIdentifier, SignatureValue, MessageAuthenticationCodeAlgorithm
+  FROM CryptographicMessageSyntax-2010
+      { iso(1) member-body(2) us(840) rsadsi(113549)
+         pkcs(1) pkcs-9(9) smime(16) modules(0) id-mod-cms-2009(58) }
+ 
+ ATTRIBUTE
+  FROM PKIX1Explicit-2009
+      { iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-mod(0)
+      id-mod-pkix1-explicit-02(51) }
+
+  AlgorithmIdentifier{}, MAC-ALGORITHM
+  FROM AlgorithmInformation-2009
+      {iso(1) identified-organization(3) dod(6) internet(1) security(5)
+      mechanisms(5) pkix(7) id-mod(0)
+      id-mod-algorithmInformation-02(58)}
+	 ;
+
+  --
+  -- Alternative structures that do not feature deep layer parsing
+  --
+  EmptyContentSet CONTENT-TYPE ::= { ... }
+  EmptyAttributeSet ATTRIBUTE ::= { ... }
+  EmptyMessageAuthenticationCodeAlgorithmSet MAC-ALGORITHM ::= {  ... }
+ 
+  ContentInfo_Shallow ::= SEQUENCE {
+      contentType        CONTENT-TYPE.
+                      &id({EmptyContentSet}),
+      content            [0] EXPLICIT CONTENT-TYPE.
+                      &Type({EmptyContentSet}{@contentType})}
+
+  EncapsulatedContentInfo_Shallow ::= SEQUENCE {
+      eContentType       CONTENT-TYPE.&id({EmptyContentSet}),
+      eContent           [0] EXPLICIT OCTET STRING
+              ( CONTAINING CONTENT-TYPE.
+                  &Type({EmptyContentSet}{@eContentType})) OPTIONAL }
+
+  SignedData_Shallow ::= SEQUENCE {
+      version CMSVersion,
+      digestAlgorithms SET OF DigestAlgorithmIdentifier,
+      encapContentInfo EncapsulatedContentInfo_Shallow,
+      certificates [0] IMPLICIT CertificateSet OPTIONAL,
+      crls [1] IMPLICIT RevocationInfoChoices OPTIONAL,
+      signerInfos SignerInfos_Shallow }
+
+  SignerInfos_Shallow ::= SET OF SignerInfo_Shallow
+
+  Attribute_Shallow{ ATTRIBUTE:AttrList } ::= SEQUENCE {
+      attrType           ATTRIBUTE.
+              &id({AttrList}),
+      attrValues         SET OF ATTRIBUTE.
+              &Type({AttrList}{@attrType})  }
+
+  Attributes_Shallow { ATTRIBUTE:AttrList } ::=
+      SET SIZE (1..MAX) OF Attribute_Shallow {{ AttrList }}
+  
+  SignerInfo_Shallow ::= SEQUENCE {
+      version CMSVersion,
+      sid SignerIdentifier,
+      digestAlgorithm DigestAlgorithmIdentifier,
+      signedAttrs [0] IMPLICIT Attributes_Shallow {{EmptyAttributeSet}} OPTIONAL,
+      signatureAlgorithm SignatureAlgorithmIdentifier,
+      signature SignatureValue,
+      unsignedAttrs [1] IMPLICIT Attributes_Shallow {{EmptyAttributeSet}}
+          OPTIONAL }
+		  
+  DigestedData_Shallow ::= SEQUENCE {
+      version CMSVersion,
+      digestAlgorithm DigestAlgorithmIdentifier,
+      encapContentInfo EncapsulatedContentInfo_Shallow,
+      digest Digest, ... }
+
+  ContentCollection_Shallow ::= SEQUENCE SIZE (1..MAX) OF ContentInfo_Shallow
+
+    ContentWithAttributes_Shallow ::= SEQUENCE {
+       content  ContentInfo_Shallow,
+       attrs    SEQUENCE SIZE (1..MAX) OF Attribute_Shallow
+                                               {{ EmptyAttributeSet }}
+    }
+ 
+   MessageAuthenticationCodeAlgorithm_Shallow ::= AlgorithmIdentifier
+      {MAC-ALGORITHM, {EmptyMessageAuthenticationCodeAlgorithmSet}}
+
+  AuthenticatedData ::= SEQUENCE {
+      version CMSVersion,
+      originatorInfo [0] IMPLICIT OriginatorInfo OPTIONAL,
+      recipientInfos RecipientInfos,
+      macAlgorithm MessageAuthenticationCodeAlgorithm_Shallow,
+      digestAlgorithm [1] DigestAlgorithmIdentifier OPTIONAL,
+      encapContentInfo EncapsulatedContentInfo_Shallow,
+      authAttrs [2] IMPLICIT Attributes_Shallow {{EmptyAttributeSet}} OPTIONAL,
+      mac MessageAuthenticationCode,
+      unauthAttrs [3] IMPLICIT Attributes_Shallow {{EmptyAttributeSet}} OPTIONAL }
+  
+  -- Omitted AuthenticatedData though it may be nice to support at some point.  
+  -- There were compilation problems with the MAC algorithm field. 
+
+  
+  END

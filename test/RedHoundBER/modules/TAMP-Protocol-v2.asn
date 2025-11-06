@@ -1,0 +1,429 @@
+   TAMP-Protocol-v2
+   { joint-iso-itu-t(2) country(16) us(840) organization(1)
+     gov(101) dod(2) infosec(1) modules(0) 30 }
+
+   DEFINITIONS IMPLICIT TAGS ::=
+   BEGIN
+
+   IMPORTS
+   TrustAnchorChoice, TrustAnchorTitle, CertPathControls
+   FROM TrustAnchorInfoModule
+      { joint-iso-itu-t(2) country(16) us(840)
+      organization(1) gov(101) dod(2) infosec(1)
+      modules(0) 33 }
+   AlgorithmIdentifier{}, SIGNATURE-ALGORITHM, KEY-WRAP
+   FROM AlgorithmInformation-2009
+      {iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-mod(0)
+      id-mod-algorithmInformation-02(58)}
+   Certificate, Name, TBSCertificate,
+   CertificateSerialNumber, Validity, SubjectPublicKeyInfo
+   FROM PKIX1Explicit-2009 -- from [RFC5912]
+      {iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-mod(0)
+      id-mod-pkix1-explicit-02(51)}
+   KeyIdentifier, OTHER-NAME
+   FROM PKIX1Implicit-2009 -- from [RFC5912]
+      {iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-mod(0)
+      id-mod-pkix1-implicit-02(59)}
+   CONTENT-TYPE
+   FROM CryptographicMessageSyntax-2010 -- from [RFC5911]
+      { iso(1) member-body(2) us(840) rsadsi(113549)
+         pkcs(1) pkcs-9(9) smime(16) modules(0) id-mod-cms-2009(58) }
+   EXTENSION, Extensions {}, ATTRIBUTE, SingleAttribute{}
+   FROM PKIX-CommonTypes-2009 -- from [RFC5912]
+      { iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-mod(0)
+      id-mod-pkixCommon-02(57) }         ;
+
+   -- Object Identifier Arc for TAMP Message Content Types
+
+   id-tamp OBJECT IDENTIFIER ::= {
+   joint-iso-itu-t(2) country(16) us(840) organization(1)
+   gov(101) dod(2) infosec(1) formats(2) 77 }
+
+   SupportedSigAlgorithms SIGNATURE-ALGORITHM ::= {
+      -- add any locally defined algorithms here
+      ...
+   }
+
+   SupportedWrapAlgorithms KEY-WRAP ::= {
+      -- add any locally defined algorithms here
+      ...
+   }
+
+   -- CMS Content Types
+
+   TAMPContentTypes CONTENT-TYPE  ::= {
+     tamp-status-query |
+     tamp-status-response |
+     tamp-update |
+     tamp-update-confirm |
+     tamp-apex-update |
+     tamp-apex-update-confirm |
+     tamp-community-update |
+     tamp-community-update-confirm |
+     tamp-sequence-number-adjust |
+     tamp-sequence-number-adjust-confirm |
+     tamp-error,
+     ... -- Expect additional content types --
+     }
+
+   -- TAMP Status Query Message
+   tamp-status-query CONTENT-TYPE  ::=
+     { TYPE TAMPStatusQuery IDENTIFIED BY id-ct-TAMP-statusQuery }
+
+   id-ct-TAMP-statusQuery OBJECT IDENTIFIER ::= { id-tamp 1 }
+
+   TAMPStatusQuery ::= SEQUENCE {
+     version         [0] TAMPVersion DEFAULT v2,
+     terse           [1] TerseOrVerbose DEFAULT verbose,
+     query           TAMPMsgRef }
+
+   TAMPVersion ::= INTEGER { v1(1), v2(2) }
+
+   TerseOrVerbose ::= ENUMERATED { terse(1), verbose(2) }
+
+   SeqNumber ::= INTEGER (0..9223372036854775807)
+
+   TAMPMsgRef ::= SEQUENCE {
+     target          TargetIdentifier,
+     seqNum          SeqNumber }
+
+   TargetIdentifier ::= CHOICE {
+     hwModules    [1] HardwareModuleIdentifierList,
+     communities  [2] CommunityIdentifierList,
+     allModules   [3] NULL,
+     uri          [4] IA5String,
+     otherName    [5] INSTANCE OF OTHER-NAME }
+
+   HardwareModuleIdentifierList ::= SEQUENCE SIZE (1..MAX) OF
+                                     HardwareModules
+
+   HardwareModules ::= SEQUENCE {
+     hwType          OBJECT IDENTIFIER,
+     hwSerialEntries SEQUENCE SIZE (1..MAX) OF HardwareSerialEntry }
+
+   HardwareSerialEntry ::= CHOICE {
+     all             NULL,
+     single          OCTET STRING,
+     block           SEQUENCE {
+       low             OCTET STRING,
+       high            OCTET STRING } }
+
+   CommunityIdentifierList ::= SEQUENCE SIZE (0..MAX) OF Community
+
+   Community ::= OBJECT IDENTIFIER
+
+   -- TAMP Status Response Message
+
+   tamp-status-response CONTENT-TYPE  ::=
+     { TYPE TAMPStatusResponse IDENTIFIED BY id-ct-TAMP-statusResponse }
+
+   id-ct-TAMP-statusResponse OBJECT IDENTIFIER ::= { id-tamp 2 }
+
+   TAMPStatusResponse ::= SEQUENCE {
+     version   [0] TAMPVersion DEFAULT v2,
+     query     TAMPMsgRef,
+     response  StatusResponse,
+     usesApex  BOOLEAN DEFAULT TRUE }
+
+   StatusResponse ::= CHOICE {
+     terseResponse         [0] TerseStatusResponse,
+     verboseResponse       [1] VerboseStatusResponse }
+
+   TerseStatusResponse ::= SEQUENCE {
+     taKeyIds              KeyIdentifiers,
+     communities           CommunityIdentifierList OPTIONAL }
+
+   KeyIdentifiers ::= SEQUENCE SIZE (1..MAX) OF KeyIdentifier
+
+   VerboseStatusResponse ::= SEQUENCE {
+     taInfo                 TrustAnchorChoiceList,
+     continPubKeyDecryptAlg [0] AlgorithmIdentifier
+                   {KEY-WRAP, {SupportedWrapAlgorithms}} OPTIONAL,
+     communities            [1] CommunityIdentifierList OPTIONAL,
+     tampSeqNumbers         [2] TAMPSequenceNumbers OPTIONAL }
+
+   TrustAnchorChoiceList ::= SEQUENCE SIZE (1..MAX) OF
+        TrustAnchorChoice
+
+   TAMPSequenceNumber ::= SEQUENCE {
+     keyId       KeyIdentifier,
+     seqNumber   SeqNumber }
+
+   TAMPSequenceNumbers ::= SEQUENCE SIZE (1..MAX) OF TAMPSequenceNumber
+
+   -- Trust Anchor Update Message
+
+   tamp-update CONTENT-TYPE  ::=
+     { TYPE TAMPUpdate IDENTIFIED BY id-ct-TAMP-update }
+
+   id-ct-TAMP-update OBJECT IDENTIFIER ::= { id-tamp 3 }
+
+   TAMPUpdate ::= SEQUENCE {
+     version  [0] TAMPVersion DEFAULT v2,
+     terse    [1] TerseOrVerbose DEFAULT verbose,
+     msgRef   TAMPMsgRef,
+     updates  SEQUENCE SIZE (1..MAX) OF TrustAnchorUpdate,
+     tampSeqNumbers [2]TAMPSequenceNumbers OPTIONAL }
+
+   TrustAnchorUpdate ::= CHOICE {
+     add             [1] TrustAnchorChoice,
+     remove          [2] SubjectPublicKeyInfo,
+     change          [3] EXPLICIT TrustAnchorChangeInfoChoice }
+
+   TrustAnchorChangeInfoChoice ::= CHOICE {
+     tbsCertChange  [0] TBSCertificateChangeInfo,
+     taChange       [1] TrustAnchorChangeInfo }
+
+   TBSCertificateChangeInfo  ::=  SEQUENCE  {
+     serialNumber         CertificateSerialNumber OPTIONAL,
+     signature            [0] AlgorithmIdentifier
+             {SIGNATURE-ALGORITHM, {SupportedSigAlgorithms}} OPTIONAL,
+     issuer               [1] Name OPTIONAL,
+     validity             [2] Validity OPTIONAL,
+     subject              [3] Name OPTIONAL,
+     subjectPublicKeyInfo [4] SubjectPublicKeyInfo,
+     exts                 [5] EXPLICIT Extensions{{...}} OPTIONAL }
+
+   TrustAnchorChangeInfo ::= SEQUENCE {
+     pubKey          SubjectPublicKeyInfo,
+     keyId           KeyIdentifier OPTIONAL,
+     taTitle         TrustAnchorTitle OPTIONAL,
+     certPath        CertPathControls OPTIONAL,
+     exts            [1] Extensions{{...}} OPTIONAL }
+
+   -- Trust Anchor Update Confirm Message
+
+   tamp-update-confirm CONTENT-TYPE  ::=
+     { TYPE TAMPUpdateConfirm IDENTIFIED BY id-ct-TAMP-updateConfirm }
+
+   id-ct-TAMP-updateConfirm OBJECT IDENTIFIER ::= { id-tamp 4 }
+
+   TAMPUpdateConfirm ::= SEQUENCE {
+     version               [0] TAMPVersion DEFAULT v2,
+     update                TAMPMsgRef,
+     confirm               UpdateConfirm }
+
+   UpdateConfirm ::= CHOICE {
+     terseConfirm          [0] TerseUpdateConfirm,
+     verboseConfirm        [1] VerboseUpdateConfirm }
+
+   TerseUpdateConfirm ::= StatusCodeList
+
+   StatusCodeList ::= SEQUENCE SIZE (1..MAX) OF StatusCode
+
+   VerboseUpdateConfirm ::= SEQUENCE {
+     status          StatusCodeList,
+     taInfo          TrustAnchorChoiceList,
+     tampSeqNumbers  TAMPSequenceNumbers OPTIONAL,
+     usesApex        BOOLEAN DEFAULT TRUE }
+
+   -- Apex Trust Anchor Update Message
+
+   tamp-apex-update CONTENT-TYPE  ::=
+       { TYPE TAMPApexUpdate IDENTIFIED BY id-ct-TAMP-apexUpdate }
+
+   id-ct-TAMP-apexUpdate OBJECT IDENTIFIER ::= { id-tamp 5 }
+
+   TAMPApexUpdate ::= SEQUENCE {
+     version            [0] TAMPVersion DEFAULT v2,
+     terse              [1] TerseOrVerbose DEFAULT verbose,
+     msgRef             TAMPMsgRef,
+     clearTrustAnchors  BOOLEAN,
+     clearCommunities   BOOLEAN,
+     seqNumber          SeqNumber OPTIONAL,
+     apexTA             TrustAnchorChoice }
+
+   -- Apex Trust Anchor Update Confirm Message
+
+   tamp-apex-update-confirm CONTENT-TYPE  ::=
+     { TYPE TAMPApexUpdateConfirm IDENTIFIED BY
+         id-ct-TAMP-apexUpdateConfirm }
+
+   id-ct-TAMP-apexUpdateConfirm OBJECT IDENTIFIER ::= { id-tamp 6 }
+
+   TAMPApexUpdateConfirm ::= SEQUENCE {
+     version               [0] TAMPVersion DEFAULT v2,
+     apexReplace           TAMPMsgRef,
+     apexConfirm           ApexUpdateConfirm }
+
+   ApexUpdateConfirm ::= CHOICE {
+     terseApexConfirm      [0] TerseApexUpdateConfirm,
+     verboseApexConfirm    [1] VerboseApexUpdateConfirm }
+
+   TerseApexUpdateConfirm ::= StatusCode
+
+   VerboseApexUpdateConfirm ::= SEQUENCE {
+     status                  StatusCode,
+     taInfo                  TrustAnchorChoiceList,
+     communities            [0] CommunityIdentifierList OPTIONAL,
+     tampSeqNumbers         [1] TAMPSequenceNumbers OPTIONAL }
+
+   -- Community Update Message
+
+   tamp-community-update CONTENT-TYPE  ::=
+     { TYPE TAMPCommunityUpdate IDENTIFIED BY id-ct-TAMP-communityUpdate }
+
+   id-ct-TAMP-communityUpdate OBJECT IDENTIFIER ::= { id-tamp 7 }
+
+   TAMPCommunityUpdate ::= SEQUENCE {
+     version         [0] TAMPVersion DEFAULT v2,
+     terse           [1] TerseOrVerbose DEFAULT verbose,
+     msgRef          TAMPMsgRef,
+     updates         CommunityUpdates }
+
+   CommunityUpdates ::= SEQUENCE {
+     remove       [1] CommunityIdentifierList OPTIONAL,
+     add          [2] CommunityIdentifierList OPTIONAL }
+     -- At least one must be present
+
+   -- Community Update Confirm Message
+
+   tamp-community-update-confirm CONTENT-TYPE  ::=
+     { TYPE TAMPCommunityUpdateConfirm IDENTIFIED BY
+       id-ct-TAMP-communityUpdateConfirm }
+
+   id-ct-TAMP-communityUpdateConfirm OBJECT IDENTIFIER ::=
+     { id-tamp 8 }
+
+   TAMPCommunityUpdateConfirm ::= SEQUENCE {
+     version         [0] TAMPVersion DEFAULT v2,
+     update          TAMPMsgRef,
+     commConfirm     CommunityConfirm }
+
+   CommunityConfirm ::= CHOICE {
+     terseCommConfirm      [0] TerseCommunityConfirm,
+     verboseCommConfirm    [1] VerboseCommunityConfirm }
+
+   TerseCommunityConfirm ::= StatusCode
+
+   VerboseCommunityConfirm ::= SEQUENCE {
+     status          StatusCode,
+     communities     CommunityIdentifierList OPTIONAL }
+
+   -- Sequence Number Adjust Message
+
+   tamp-sequence-number-adjust CONTENT-TYPE  ::=
+     { TYPE SequenceNumberAdjust IDENTIFIED BY id-ct-TAMP-seqNumAdjust }
+
+   id-ct-TAMP-seqNumAdjust OBJECT IDENTIFIER ::= { id-tamp 10 }
+
+   SequenceNumberAdjust ::= SEQUENCE {
+     version         [0] TAMPVersion DEFAULT v2,
+
+     msgRef          TAMPMsgRef }
+
+   -- Sequence Number Adjust Confirm Message
+
+   tamp-sequence-number-adjust-confirm CONTENT-TYPE  ::=
+     { TYPE SequenceNumberAdjustConfirm IDENTIFIED BY
+       id-ct-TAMP-seqNumAdjustConfirm }
+
+   id-ct-TAMP-seqNumAdjustConfirm OBJECT IDENTIFIER ::= { id-tamp 11 }
+
+   SequenceNumberAdjustConfirm ::= SEQUENCE {
+     version         [0] TAMPVersion DEFAULT v2,
+     adjust          TAMPMsgRef,
+     status          StatusCode }
+
+   -- TAMP Error Message
+
+   tamp-error CONTENT-TYPE  ::=
+     { TYPE TAMPError IDENTIFIED BY id-ct-TAMP-error }
+
+   id-ct-TAMP-error OBJECT IDENTIFIER ::= { id-tamp 9 }
+
+   TAMPError ::= SEQUENCE {
+     version         [0] TAMPVersion DEFAULT v2,
+     msgType         OBJECT IDENTIFIER,
+     status          StatusCode,
+     msgRef          TAMPMsgRef OPTIONAL }
+
+   -- Status Codes
+
+   StatusCode ::= ENUMERATED {
+     success                            (0),
+     decodeFailure                      (1),
+     badContentInfo                     (2),
+     badSignedData                      (3),
+     badEncapContent                    (4),
+     badCertificate                     (5),
+     badSignerInfo                      (6),
+     badSignedAttrs                     (7),
+     badUnsignedAttrs                   (8),
+     missingContent                     (9),
+     noTrustAnchor                     (10),
+     notAuthorized                     (11),
+     badDigestAlgorithm                (12),
+     badSignatureAlgorithm             (13),
+     unsupportedKeySize                (14),
+     unsupportedParameters             (15),
+     signatureFailure                  (16),
+     insufficientMemory                (17),
+     unsupportedTAMPMsgType            (18),
+     apexTAMPAnchor                    (19),
+     improperTAAddition                (20),
+     seqNumFailure                     (21),
+     contingencyPublicKeyDecrypt       (22),
+     incorrectTarget                   (23),
+     communityUpdateFailed             (24),
+     trustAnchorNotFound               (25),
+     unsupportedTAAlgorithm            (26),
+     unsupportedTAKeySize              (27),
+     unsupportedContinPubKeyDecryptAlg (28),
+     missingSignature                  (29),
+     resourcesBusy                     (30),
+     versionNumberMismatch             (31),
+     missingPolicySet                  (32),
+     revokedCertificate                (33),
+     unsupportedTrustAnchorFormat      (34),
+     improperTAChange                  (35),
+     malformed                         (36),
+     cmsError                          (37),
+     unsupportedTargetIdentifier       (38),
+     other                            (127) }
+
+   -- Object Identifier Arc for Attributes
+
+   id-attributes OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16)
+     us(840) organization(1) gov(101) dod(2) infosec(1) 5 }
+
+   -- TAMP Unsigned Attributes
+   -- These attributes are unsigned attributes and go into the
+   --    UnsignedAttributes set in [RFC5652]
+
+   TAMPUnsignedAttributes ATTRIBUTE ::= {
+     contingency-public-key-decrypt-key,
+     ... -- Expect additional attributes --
+     }
+
+   -- contingency-public-key-decrypt-key unsigned attribute
+
+   contingency-public-key-decrypt-key ATTRIBUTE ::= {
+     TYPE PlaintextSymmetricKey IDENTIFIED BY
+     id-aa-TAMP-contingencyPublicKeyDecryptKey }
+
+   id-aa-TAMP-contingencyPublicKeyDecryptKey OBJECT IDENTIFIER ::= {
+     id-attributes 63 }
+
+   PlaintextSymmetricKey ::= OCTET STRING
+
+   -- id-pe-wrappedApexContinKey extension
+
+   wrappedApexContinKey EXTENSION ::= {
+        SYNTAX         ApexContingencyKey
+        IDENTIFIED BY  id-pe-wrappedApexContinKey }
+
+   id-pe-wrappedApexContinKey OBJECT IDENTIFIER ::=
+        { iso(1) identified-organization(3) dod(6) internet(1)
+          security(5) mechanisms(5) pkix(7) pe(1) 20 }
+
+   ApexContingencyKey ::= SEQUENCE {
+     wrapAlgorithm
+         AlgorithmIdentifier{KEY-WRAP, {SupportedWrapAlgorithms}},
+     wrappedContinPubKey  OCTET STRING }
+
+   END

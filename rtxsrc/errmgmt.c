@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1997-2016 by Objective Systems, Inc.
+ * Copyright (c) 1997-2025 by Objective Systems, Inc.
  * http://www.obj-sys.com
  *
  * This software is furnished under an open source license and may be
@@ -259,3 +259,9 @@ int rtxErrSetData (OSCTXT* pctxt, int status, const char* module, int lno)
    return status;
 }
 
+int rtxErrCheckNonFatal(OSCTXT* pctxt)
+{
+   /* Non-fatal errors are not supported in the open source version. This
+      function just returns the status logged in the context structure. */
+   return pctxt->errInfo.status;
+}

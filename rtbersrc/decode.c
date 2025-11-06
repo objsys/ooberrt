@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1997-2016 by Objective Systems, Inc.
+ * Copyright (c) 1997-2025 by Objective Systems, Inc.
  * http://www.obj-sys.com
  *
  * This software is furnished under an open source license and may be
@@ -343,6 +343,36 @@ int xd_enum
    return 0;
 }
 
+int xd_enumInt8 (OSCTXT *pctxt, OSINT8 *object_p,
+                 ASN1TagType tagging, int length)
+{
+   OSINT32 tmp;
+   int ret = xd_enum(pctxt, &tmp, tagging, length);
+   if (0 == ret) {
+      if (tmp >= OSINT8_MIN && tmp <= OSINT8_MAX) {
+         *object_p = (OSINT8)tmp;
+         return 0;
+      }
+      else return LOG_RTERR (pctxt, RTERR_TOOBIG);
+   }
+   return LOG_RTERR (pctxt, ret);
+}
+
+int xd_enumInt16 (OSCTXT *pctxt, OSINT16 *object_p,
+                  ASN1TagType tagging, int length)
+{
+   OSINT32 tmp;
+   int ret = xd_enum(pctxt, &tmp, tagging, length);
+   if (0 == ret) {
+      if (tmp >= OSINT16_MIN && tmp <= OSINT16_MAX) {
+         *object_p = (OSINT16)tmp;
+         return 0;
+      }
+      else return LOG_RTERR (pctxt, RTERR_TOOBIG);
+   }
+   return LOG_RTERR (pctxt, ret);
+}
+
 int xd_enumUnsigned
 (OSCTXT *pctxt, OSUINT32 *object_p, ASN1TagType tagging, int length)
 {
@@ -363,6 +393,36 @@ int xd_enumUnsigned
    if (status != 0) return LOG_RTERR (pctxt, status);
 
    return 0;
+}
+
+int xd_enumUInt8 (OSCTXT *pctxt, OSUINT8 *object_p,
+                  ASN1TagType tagging, int length)
+{
+   OSUINT32 tmp;
+   int ret = xd_enumUnsigned(pctxt, &tmp, tagging, length);
+   if (0 == ret) {
+      if (tmp <= OSUINT8_MAX) {
+         *object_p = (OSUINT8)tmp;
+         return 0;
+      }
+      else return LOG_RTERR (pctxt, RTERR_TOOBIG);
+   }
+   return LOG_RTERR (pctxt, ret);
+}
+
+int xd_enumUInt16 (OSCTXT *pctxt, OSUINT16 *object_p,
+                   ASN1TagType tagging, int length)
+{
+   OSUINT32 tmp;
+   int ret = xd_enumUnsigned(pctxt, &tmp, tagging, length);
+   if (0 == ret) {
+      if (tmp <= OSUINT16_MAX) {
+         *object_p = (OSUINT16)tmp;
+         return 0;
+      }
+      else return LOG_RTERR (pctxt, RTERR_TOOBIG);
+   }
+   return LOG_RTERR (pctxt, ret);
 }
 
 int xd_int16
@@ -621,7 +681,7 @@ int xd_match (OSCTXT *pctxt, ASN1TAG tag, int *len_p, OSOCTET flags)
             if (!(flags & XM_ADVANCE)) {
                if (len_p) {
                   if (pctxt->buffer.byteIndex > savedBufferInfo.byteIndex) {
-                     OSSIZE tmpsize = 
+                     OSSIZE tmpsize =
                         pctxt->buffer.byteIndex - savedBufferInfo.byteIndex;
                      if (tmpsize <= OSINT32_MAX) {
                         (*len_p) += (int)tmpsize;
@@ -1055,12 +1115,12 @@ static int openTypeAppend (OSCTXT *pctxt, OSRTDList *pElemList)
    return 0;
 }
 
-int xd_OpenTypeExt
-(OSCTXT* pctxt, ASN1CCB* ccb_p, ASN1TAG tag, OSRTDList *pElemList)
+int xd_OpenTypeExt(OSCTXT* pctxt, ASN1CCB* ccb_p, ASN1TAG* tags,
+                   int tagCount, OSRTDList *pElemList)
 {
    int length, stat;
 
-   if (tag == ASN_K_NOTAG) {
+   if (tags == 0) {
 
       /* Loop through remaining elements in SEQUENCE */
 
@@ -1070,6 +1130,8 @@ int xd_OpenTypeExt
       }
    }
    else {
+      /* Only the first tag is checked in the open source version */
+      ASN1TAG tag = tags[0];
 
       /* Loop through elements until matching tag found or some other   */
       /* error occurs..                                                 */

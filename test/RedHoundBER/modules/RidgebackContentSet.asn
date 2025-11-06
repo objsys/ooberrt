@@ -1,0 +1,82 @@
+  RidgebackContentSetModule
+  { iso(1) identified-organization(3) 
+    dod(6) internet(1) private(4) enterprise(1) redhound(37623)
+	id-rhs-mod(0) id-rhs-ridgeback(1) }
+
+   DEFINITIONS IMPLICIT TAGS ::=
+   BEGIN
+   IMPORTS
+	
+    ct-Data, ct-SignedData, ct-EncryptedData, ct-EnvelopedData, ct-AuthenticatedData, ct-DigestedData, CONTENT-TYPE, ContentSet, ContentSet_SMIME
+    FROM CryptographicMessageSyntax-2010
+      { iso(1) member-body(2) us(840) rsadsi(113549)
+         pkcs(1) pkcs-9(9) smime(16) modules(0) id-mod-cms-2009(58) }
+
+    ct-ContentCollection, ct-ContentWithAttributes, ContentSet
+	FROM ContentCollectionModule-2010
+      { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1)
+        pkcs-9(9) smime(16) modules(0) id-mod-context-Collect-2009(56) }
+
+	ct-authEnvelopedData
+	FROM CMS-AuthEnvelopedData-2010
+      {iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9)
+      smime(16) modules(0) id-mod-cmsAuthEnvData-2009(57) }
+	  
+    ct-compressedData, ContentSet
+	FROM CompressedDataContent-2010
+      { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9)
+        smime(16) modules(0) id-mod-compressedDataContent(54) }
+		 
+    ct-symmetric-key-package, ContentSet
+	FROM SymmetricKeyPackageModulev1
+     { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9)
+       smime(16) modules(0) id-mod-symmetricKeyPkgV1(33) }
+
+	ct-asymmetric-key-package, ContentSet
+	FROM AsymmetricKeyPackageModuleV1
+     { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9)
+       smime(16) modules(0) id-mod-asymmetricKeyPkgV1(50) }
+	   
+	ct-encrypted-key-package, ContentSet
+	FROM EncryptedKeyPackageModuleV1
+     { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9)
+       smime(16) modules(0) id-mod-encryptedKeyPkgV1(51) }
+
+    tamp-status-query, tamp-status-response, tamp-update, tamp-update-confirm, tamp-apex-update, 
+    tamp-apex-update-confirm, tamp-community-update, tamp-community-update-confirm, tamp-sequence-number-adjust, 
+    tamp-sequence-number-adjust-confirm, tamp-error, TAMPContentTypes
+    FROM TAMP-Protocol-v2
+      { joint-iso-itu-t(2) country(16) us(840) organization(1)
+         gov(101) dod(2) infosec(1) modules(0) 30 }
+		 
+    ct-scvp-certValRequest, ct-scvp-certValResponse, ct-scvp-valPolRequest, ct-scvp-valPolResponse, ContentTypes
+    FROM SCVP-2009
+      { iso(1) identified-organization(3) dod(6) internet(1) security(5)
+          mechanisms(5) pkix(7) id-mod(0) id-mod-scvp-02(52) }
+	;
+
+	RidgebackContentSet CONTENT-TYPE ::= {
+		RidgebackCompositionalContentSet | RidgebackLeafContentSet, 
+		... 
+	}
+
+	RidgebackLeafContentSet CONTENT-TYPE ::= {
+		TAMP-Protocol-v2.TAMPContentTypes | 
+		ct-symmetric-key-package | ct-asymmetric-key-package | ct-scvp-valPolRequest | ct-scvp-valPolResponse | ct-scvp-certValRequest | ct-scvp-certValResponse |ct-encrypted-key-package, 
+		... 
+	}
+	
+	RidgebackBustedContentSet CONTENT-TYPE ::= {
+		-- XXX*** Ideally EncryptedKeyPackage would be in RidgebackLeafContentSet but including it currently results in code that will not compile
+		ct-encrypted-key-package,
+		...
+	}
+
+	RidgebackCompositionalContentSet CONTENT-TYPE ::= {	
+		CryptographicMessageSyntax-2010.ContentSet |
+		ct-ContentCollection | ct-ContentWithAttributes | 
+		ct-compressedData | ct-authEnvelopedData,
+		... }
+	  
+	  END
+	  
