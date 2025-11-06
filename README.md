@@ -8,7 +8,7 @@ support for the X.680 standard, but provides support for the most
 common items used in many ASN.1 specifications.  These include security 
 specifications such as PKIX, CMS and PKCS; a number of telephony call 
 detail record (CDR) formats such as TAP3, NRTRDE, and various vendor 
-switch specifcations; and other simple specifications that make use 
+switch specifications; and other simple specifications that make use 
 of the BER/DER encoding rules. 
 
 Particular ASN.1 types known to not be supported in this library include 
