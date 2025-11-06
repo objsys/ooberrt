@@ -21,7 +21,7 @@ If creating the kit in a branch, do the following:
 If creating the kit in dev, do the following:
     a. From the dev directory, delete the ooberrt directory.
     b. Clone the ooberrt directory:
-        git clone https://github.com/objsys/ooberrt
+        git clone git@github.com:objsys/ooberrt.git
 
 2. Change directory to the ooberrt directory and create the kit:
     perl mkkit.pl
