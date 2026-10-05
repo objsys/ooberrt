@@ -491,9 +491,11 @@ EXTERNRT int rtxErrAddStrParm (OSCTXT* pctxt, const char* errprm_p);
  * error conditions, the function will return zero.
  * 
  * @param pctxt        A pointer to a context structure.
+ * @param origStat     Error status at the time of the call (specify 0 if not
+ *                     applicable).
  * @return             An error status or zero.
  */
-EXTERNRT int rtxErrCheckNonFatal(OSCTXT* pctxt);
+EXTERNRT int rtxErrCheckNonFatal(OSCTXT* pctxt, int origStat);
 
 /**
  * This function frees memory associated with the storage of parameters

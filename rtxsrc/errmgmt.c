@@ -259,8 +259,9 @@ int rtxErrSetData (OSCTXT* pctxt, int status, const char* module, int lno)
    return status;
 }
 
-int rtxErrCheckNonFatal(OSCTXT* pctxt)
+int rtxErrCheckNonFatal(OSCTXT* pctxt, int origStat)
 {
+   if (0 != origStat) return origStat;
    /* Non-fatal errors are not supported in the open source version. This
       function just returns the status logged in the context structure. */
    return pctxt->errInfo.status;
