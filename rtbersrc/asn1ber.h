@@ -610,6 +610,61 @@ EXTERNRT int xd_charstr
  ASN1TAG tag, int length);
 
 /**
+ * This function is for decoding ASN.1 GeneralizedTime. It allocates memory for
+ * the decoded string and returns a pointer to the data.
+ * 
+ * If the ASN1DER flag is set, this will log (and return) an error
+ * if the CER/DER requirements are not met (this does not cause a non-zero
+ * return).
+ *
+ * @param pctxt        Pointer to ASN.1 context block structure
+ * @param object_p     Pointer to a pointer to receive the address of the
+ *                       allocated memory into which the decoded character
+ *                       string data will be stored. The string is assumed to
+ *                       be a normal C string containing non-null characters. A
+ *                       null terminator is automatically added to the end of
+ *                       the string by this function.
+ * @param tagging      Specifies whether element is implicitly or explicitly
+ *                       tagged.
+ * @param tag          Tag variable to match
+ * @param length       Length of data to retrieve. Valid for implicit case
+ *                       only.
+ * @return             Completion status of operation:
+ *                       - 0 (0) = success,
+ *                       - negative return value is error.
+ */
+EXTERNRT OSINT32 xd_gentime(OSCTXT* pctxt, const char** object_p,
+   ASN1TagType tagging, ASN1TAG tag, OSINT32 length);
+
+/**
+ * This function is for decoding ASN.1 UTCTime. It allocates memory for
+ * the decoded string and returns a pointer to the data.
+ *
+ * If the ASN1DER flag is set, this will log (and reutrn) an error
+ * if the CER/DER requirements are not met (this does not cause a non-zero
+ * return).
+ *
+ * @param pctxt        Pointer to ASN.1 context block structure
+ * @param object_p     Pointer to a pointer to receive the address of the
+ *                       allocated memory into which the decoded character
+ *                       string data will be stored. The string is assumed to
+ *                       be a normal C string containing non-null characters. A
+ *                       null terminator is automatically added to the end of
+ *                       the string by this function.
+ * @param tagging      Specifies whether element is implicitly or explicitly
+ *                       tagged.
+ * @param tag          Tag variable to match
+ * @param length       Length of data to retrieve. Valid for implicit case
+ *                       only.
+ * @return             Completion status of operation:
+ *                       - 0 (0) = success,
+ *                       - negative return value is error.
+ */
+EXTERNRT OSINT32 xd_utc(OSCTXT* pctxt, const char** object_p,
+   ASN1TagType tagging, ASN1TAG tag, OSINT32 length);
+   
+
+/**
  * This function is used to decode a variable of the ASN.1 UTF-8 string
  * type.  This function allocates memory for the decoded string and returns
  * a pointer to the data.
@@ -1402,6 +1457,67 @@ EXTERNRT int xe_32BitCharStr
 (OSCTXT* pctxt, Asn132BitCharString* pvalue,
  ASN1TagType tagging, ASN1TAG tag);
 
+/**
+ * This function will encode value of ASN.1 type GeneralizedTime.
+ *
+ * If the ASN1DER flag is set, this will ensure the encoding
+ * complies with CER/DER; in this case, the input must end in Z or have an
+ * explicit timezone offset provided.
+ *
+ * @param pctxt        Pointer to a context block structure. This provides a
+ *                       storage area for the function to store all working
+ *                       variables that must be maintained between function
+ *                       calls.
+ * @param object_p     A pointer to a null-terminated C character string to be
+ *                       encoded
+ * @param tagging      An enumerated type whose value is set to either
+ *                       'ASN1EXPL' (for explicit tagging) or 'ASN1IMPL' (for
+ *                       implicit). Controls whether the universal tag value
+ *                       for this type is added or not. Users will generally
+ *                       always set this value to 'ASN1EXPL'.
+ * @param tag          The Universal ASN.1 tag to be encoded in the message.
+ *                       This parameter is passed using the internal
+ *                       representation discussed in Section 4.1.2. It is
+ *                       passed as an unsigned 16-bit integer. The tag value
+ *                       must represent one of the 8-bit character string types
+ *                       documented in the X.680 standard.
+ * @return             Length of the encoded message component. A negative
+ *                       status value will be returned if encoding is not
+ *                       successful.
+ */
+EXTERNRT OSINT32 xe_gentime(OSCTXT* pctxt, const char* object_p,
+   ASN1TagType tagging, ASN1TAG tag);
+
+/**
+ * This function will encode value of ASN.1 type UTCTime.
+ *
+ * If the ASN1DER flag is set, this will ensure the encoding
+ * complies with CER/DER.
+ *
+ * @param pctxt        Pointer to a context block structure. This provides a
+ *                       storage area for the function to store all working
+ *                       variables that must be maintained between function
+ *                       calls.
+ * @param object_p     A pointer to a null-terminated C character string to be
+ *                       encoded
+ * @param tagging      An enumerated type whose value is set to either
+ *                       'ASN1EXPL' (for explicit tagging) or 'ASN1IMPL' (for
+ *                       implicit). Controls whether the universal tag value
+ *                       for this type is added or not. Users will generally
+ *                       always set this value to 'ASN1EXPL'.
+ * @param tag          The Universal ASN.1 tag to be encoded in the message.
+ *                       This parameter is passed using the internal
+ *                       representation discussed in Section 4.1.2. It is
+ *                       passed as an unsigned 16-bit integer. The tag value
+ *                       must represent one of the 8-bit character string types
+ *                       documented in the X.680 standard.
+ * @return             Length of the encoded message component. A negative
+ *                       status value will be returned if encoding is not
+ *                       successful.
+ */
+EXTERNRT OSINT32 xe_utc(OSCTXT* pctxt, const char* object_p,
+   ASN1TagType tagging, ASN1TAG tag);
+   
 /**
  * This function will encode an ASN.1 NULL placeholder.
  *

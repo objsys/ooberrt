@@ -636,6 +636,50 @@ void xe_free (OSCTXT* pctxt)
    }
 }
 
+OSINT32 xe_gentime(OSCTXT* pctxt, const char* pvalue,
+               ASN1TagType tagging, ASN1TAG tag)
+{
+   OSNumDateTime dateTime;
+   int stat;
+
+   if (NULL == pvalue)
+   {
+      return 0;
+   }
+
+   stat = rtParseGeneralizedTime2(pctxt, pvalue, &dateTime, FALSE);
+   if (stat == ASN_E_NOTCANON)
+   {
+      /* Input is not canonical value and should be. Get & encode canonical
+         value. 
+      */
+      if (!dateTime.tz_flag)
+      {
+         /* Time is local time w/o offset. Since we don't know the offset to
+            use, we can't convert it to UTC as required.
+         */
+         stat = LOG_RTERR(pctxt, RTERR_INVFORMAT);
+      }
+      else {
+         /* Get cnanonical format */
+         char canonValue[100];
+         char* value = canonValue;
+
+         /* Convert to UTC, if not already. */
+         if (dateTime.tzo != 0) normalizeTimeZone(&dateTime);
+
+         stat = rtMakeGeneralizedTime(pctxt, &dateTime, 
+            &value, sizeof(canonValue));
+         if ( stat < 0 ) stat = LOG_RTERR(pctxt, stat);
+         else stat = xe_charstr(pctxt, canonValue, tagging, tag);
+      }
+   }
+   else if ( stat < 0 ) stat = LOG_RTERR(pctxt, stat);
+   else stat = xe_charstr(pctxt, pvalue, tagging, tag);
+
+   return stat;
+}
+
 int xe_int16 (OSCTXT* pctxt, OSINT16 *pvalue, ASN1TagType tagging)
 {
    register OSOCTET lb;
@@ -1075,6 +1119,57 @@ int xe_uint (OSCTXT* pctxt, OSUINT32 *pvalue, ASN1TagType tagging)
    }
 
    return (aal);
+}
+
+OSINT32 xe_utc(OSCTXT* pctxt, const char* pvalue,
+               ASN1TagType tagging, ASN1TAG tag)
+{
+   OSNumDateTime dateTime;
+   int stat;
+
+   if (NULL == pvalue)
+   {
+      return 0;
+   }
+
+   stat = rtParseUTCTime2(pctxt, pvalue, &dateTime, FALSE);
+   if (stat == ASN_E_NOTCANON)
+   {
+      /* Input is not canonical value and should be. Get & encode canonical
+         value. We only know the year % 100 (2 digit year). If the year is
+         zero, we don't know whether it is a leap year. In that case, if 
+         normalizeTimeZone's adjustment moves us from Mar 1 to Feb 29
+         or Feb 28 to Feb 29, the result could be wrong; report an error.
+         Note that normalizeTimeZone treats year 0 as a leap year, so
+         its calendar has Feb 28, Feb 29, Mar 1, which determines what we have
+         to test for here.
+      */
+      char canonValue[100];
+      char* value = canonValue;
+      OSUINT8 orig_month = dateTime.mon;
+      OSUINT8 orig_day = dateTime.day;
+
+      normalizeTimeZone(&dateTime);
+      
+      if (dateTime.year == 0 && (
+         (orig_month == 3 && dateTime.mon == 2) ||
+         (orig_month == 2 && orig_day == 28 && dateTime.day == 29)))
+      {
+         /* Use ASN_E_NOTCANON as the error: the original string was not
+            in canonical form, canonical form is required, and we can't
+            coerce it.
+         */
+         stat = ASN_E_NOTCANON;
+      }
+      else stat = rtMakeUTCTime(pctxt, &dateTime, 
+         &value, sizeof(canonValue));
+      if ( stat < 0 ) stat = LOG_RTERR(pctxt, stat);
+      else stat = xe_charstr(pctxt, canonValue, tagging, tag);
+   }
+   else if ( stat < 0 ) stat = LOG_RTERR(pctxt, stat);
+   else stat = xe_charstr(pctxt, pvalue, tagging, tag);
+
+   return stat;
 }
 
 static OSBOOL testBit

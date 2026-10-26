@@ -425,6 +425,31 @@ int xd_enumUInt16 (OSCTXT *pctxt, OSUINT16 *object_p,
    return LOG_RTERR (pctxt, ret);
 }
 
+OSINT32 xd_gentime(OSCTXT* pctxt, const char** object_p,
+               ASN1TagType tagging, ASN1TAG tag, OSINT32 length)
+{
+   const char *pdata;
+   int stat = 0;
+   OSNumDateTime dateTime;
+
+   stat = xd_charstr(pctxt, &pdata, tagging, tag, (OSSIZE)length);
+   if (0 != stat)
+   {
+      return stat;
+   }
+
+   /* Now validate string. */
+   stat = rtParseGeneralizedTime2(pctxt, pdata, &dateTime, TRUE);
+   if ( stat != 0 ) {
+      LOG_RTERR(pctxt, stat);
+      rtxMemFreePtr(pctxt, pdata);
+      pdata = NULL;
+   }
+
+   *object_p = pdata;
+   return stat;
+}
+
 int xd_int16
 (OSCTXT *pctxt, OSINT16 *pvalue, ASN1TagType tagging, int length)
 {
@@ -1490,6 +1515,32 @@ int xd_uint64 (OSCTXT *pctxt, OSUINT64 *object_p,
    return 0;
 }
 
+OSINT32 xd_utc(OSCTXT* pctxt, const char** object_p,
+               ASN1TagType tagging, ASN1TAG tag, OSINT32 length)
+{
+   const char *pdata;
+   int stat = 0;
+   OSNumDateTime dateTime;
+
+   stat = xd_charstr(pctxt, &pdata, tagging, tag, (OSSIZE)length);
+   if (0 != stat)
+   {
+      return stat;
+   }
+
+   /* Now validate string. */
+   stat = rtParseUTCTime2(pctxt, pdata, &dateTime, TRUE);
+
+   if ( stat != 0 )
+   {
+      LOG_RTERR(pctxt, stat);
+      rtxMemFreePtr(pctxt, pdata);
+      pdata = NULL;
+   }
+
+   *object_p = pdata;
+   return stat;
+}
 int xd_16BitCharStr (OSCTXT* pctxt, Asn116BitCharString* pvalue,
                      ASN1TagType tagging, ASN1TAG tag, int length)
 {

@@ -10,8 +10,8 @@ detail record (CDR) formats such as TAP3, NRTRDE, and various vendor
 switch specifications; and other simple specifications that make use
 of the BER/DER encoding rules.
 
-Particular ASN.1 types known to not be supported in this library include
-REAL, EXTERNAL, EMBEDDED-PDV, Restricted Character String, and the
+Particular ASN.1 types known to NOT be supported in this library include
+REAL, EXTERNAL, EMBEDDED-PDV, Unrestricted Character String, and the
 newer date/time and IRI types.  In addition, the libary is known to
 be not as performant as our standard, commercial BER/DER/CER library.
 Nonetheless, it should prove to be adequate for a variety of applications.

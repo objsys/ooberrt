@@ -83,6 +83,7 @@
 #define ASN_E_INVLEN    -101
 #define ASN_E_INVINDEX  -104
 #define ASN_E_NOTINSEQ  -111
+#define ASN_E_NOTCANON -114
 
 #define LOG_RTERR(pctxt,stat) \
 rtxErrSetData(pctxt,stat,__FILE__,__LINE__)
@@ -207,6 +208,7 @@ typedef struct {
 #define ASN1CONSTAG     0x0400  /* form of last parsed tag              */
 #define ASN1CANXER      0x0200  /* canonical XER                        */
 #define ASN1SAVEBUF     0x0100  /* do not free dynamic encode buffer    */
+#define ASN1DER         0x0100  /* turn on DER mode */
 #define ASN1OPENTYPE    0x0080  /* item is an open type field           */
 
 /* ASN.1 encode/decode context block structure */
@@ -956,11 +958,105 @@ EXTERNRT OSBOOL rtxTimeIsValid (const OSNumDateTime* pvalue);
  */
 EXTERNRT OSBOOL rtxDateTimeIsValid (const OSNumDateTime* pvalue);
 
-EXTERNRT int rtParseGeneralizedTime
+/**
+ * This function creates a time string in ASN.1 GeneralizedTime format as
+ * specified in the X.680 ITU-T standard.
+ * 
+ * The result will satisfy two of the three requirements for CER/DER: 1) seconds
+ * are included, and 2) there will not be a zero fraction or trailing zeros. The
+ * additional requirement of ending in Z will be satisfied if and only if 
+ * dateTime.tz_flag && dateTime.tzo == 0. Note: you can use normalizeTimeZone to
+ * convert a timezone offset to UTC.
+ *
+ * @param pctxt        A pointer to a context structure. This provides a
+ *                       storage area for the function to store all working
+ *                       variables that must be maintained between function
+ *                       calls.
+ * @param dateTime     A pointer to a date/time structure that contains
+ *                       components of the date and time.
+ * @param outdata      A pointer to a pointer to a destination string. If
+ *                       outdataSize is non-zero, it should be a pointer to a
+ *                       pointer to an actual array. Otherwise, the memory will
+ *                       be allocated and the pointer will be stored in the \c
+ *                       outdata.
+ * @param outdataSize  A size of outdata (in octets). If zero, the memory for
+ *                       the \c outdata will be allocated. If not, the \c
+ *                       outdata 's size should be big enough to receive the
+ *                       generated time string. Otherwise, error code will be
+ *                       returned.
+ * @return             Completion status of operation:
+ *                       - 0 (ASN_OK) = success,
+ *                       - negative return value is error.
+ */
+EXTERNRT OSINT32 rtMakeGeneralizedTime (OSCTXT* pctxt,
+                                    const OSNumDateTime* dateTime,
+                                    char** outdata,
+                                    size_t outdataSize);
+
+
+/**
+ * This function creates a time string in ASN.1 UTCTime format as specified in
+ * the X.680 ITU-T standard.
+ *
+ * If the ASN1DER flag is set, the result will include seconds,
+ * as required by CER/DER. The additional CER/DER requirements of 1) ending in
+ * Z and 2) not using 24 for midnight will be satisfied if and only if the
+ * input value satisfies these requirements. Note: you can use normalizeTimeZone
+ * to ensure this.
+ * 
+ * @param pctxt        A pointer to a context structure. This provides a
+ *                       storage area for the function to store all working
+ *                       variables that must be maintained between function
+ *                       calls.
+ * @param dateTime     A pointer to a date/time structure that contains
+ *                       components of the date and time.
+ * @param outdata      A pointer to a pointer to a destination string. If
+ *                       outdataSize is non-zero, it should be a pointer to a
+ *                       pointer to an actual array. Otherwise, the memory will
+ *                       be allocated and the pointer will be stored in the \c
+ *                       outdata.
+ * @param outdataSize  A size of outdata (in octets). If zero, the memory for
+ *                       the \c outdata will be allocated. If not, the \c
+ *                       outdata 's size should be big enough to receive the
+ *                       generated time string. Otherwise, error code will be
+ *                       returned.
+ * @return             Completion status of operation:
+ *                       - 0 (ASN_OK) = success,
+ *                       - negative return value is error.
+ */
+EXTERNRT OSINT32 rtMakeUTCTime (OSCTXT* pctxt,
+                            const OSNumDateTime* dateTime,
+                            char** outdata,
+                            size_t outdataSize);
+
+EXTERNRT OSINT32 rtParseGeneralizedTime
 (OSCTXT *pctxt, const char* value, OSNumDateTime* dateTime);
 
-EXTERNRT int rtParseUTCTime
+EXTERNRT OSINT32 rtParseGeneralizedTime2(OSCTXT *pctxt,
+   const char* value,
+   OSNumDateTime* dateTime,
+   OSBOOL logCanon);
+
+EXTERNRT OSINT32 rtParseUTCTime
 (OSCTXT *pctxt, const char* value, OSNumDateTime* dateTime);
+
+EXTERNRT OSINT32 rtParseUTCTime2(OSCTXT *pctxt,
+   const char* value,
+   OSNumDateTime* dateTime, OSBOOL logCanon);
+
+/**
+ * This function normalizes the time zone for the given datetime structure.
+ * 
+ * PRE: tzo_flag is set.
+ * 
+ * In particular:
+ * 1) If hour == 24, it will be set to 0 and the date moved ahead 1.
+ * 2) If tz_flag is set and tzo is not zero, tzo will be set to zero and the
+ *    year, month, day, hour, and minute updated accordingly.
+ *
+ * @param   pvalue   A pointer-to an OSNumDateTime structure.
+ */
+EXTERNRT void normalizeTimeZone(OSNumDateTime* pvalue);
 
 /**
  * @} ccfDateTime
