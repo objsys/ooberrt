@@ -90,3 +90,39 @@ void rtxCtxtClearFlag (OSCTXT* pctxt, OSUINT16 mask)
 {
    pctxt->flags &= ~mask;
 }
+
+/*
+These six function definitions are for functions that are referenced in the
+generated code but aren't needed for the open source BER library.  Their
+implementations are basically no-ops.
+*/
+OSINT32 rtxCtxtPushTypeName (OSCTXT* pctxt, const OSUTF8CHAR* typeName)
+{
+   return 0;
+}
+
+const OSUTF8CHAR* rtxCtxtPopTypeName (OSCTXT* pctxt)
+{
+   return NULL;
+}
+
+OSINT32 rtxCtxtPushElemName (OSCTXT* pctxt, const OSUTF8CHAR* elemName)
+{
+   return 0;
+}
+
+const OSUTF8CHAR* rtxCtxtPopElemName (OSCTXT* pctxt)
+{
+   return NULL;
+}
+
+OSINT32 rtxCtxtPushArrayElemName
+(OSCTXT* pctxt, const OSUTF8CHAR* elemName, OSSIZE idx)
+{
+   return 0;
+}
+
+OSBOOL rtxCtxtPopArrayElemName (OSCTXT* pctxt)
+{
+   return FALSE;
+}

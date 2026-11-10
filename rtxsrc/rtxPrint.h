@@ -24,6 +24,7 @@
 #include "rtxsrc/rtxCommon.h"
 
 #define OSRTINDENTSPACES        3       /* number of spaces for indent  */
+#define rtxPrintUnicodeCharStr64 rtxPrintUnicodeCharStr
 
 #ifdef __cplusplus
 extern "C" {

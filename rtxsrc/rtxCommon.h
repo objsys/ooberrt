@@ -285,6 +285,19 @@ typedef struct _OSRTSList {
    struct OSCTXT* pctxt;
 } OSRTSList;
 
+/*
+These function prototypes are for functions that are referenced in the
+generated code but aren't needed for the open source BER library.  Their
+implementations are basically no-ops.
+*/
+EXTERNRT OSINT32 rtxCtxtPushTypeName (OSCTXT* pctxt, const OSUTF8CHAR* typeName);
+EXTERNRT const OSUTF8CHAR* rtxCtxtPopTypeName (OSCTXT* pctxt);
+EXTERNRT OSINT32 rtxCtxtPushElemName (OSCTXT* pctxt, const OSUTF8CHAR* elemName);
+EXTERNRT const OSUTF8CHAR* rtxCtxtPopElemName (OSCTXT* pctxt);
+EXTERNRT OSINT32 rtxCtxtPushArrayElemName
+(OSCTXT* pctxt, const OSUTF8CHAR* elemName, OSSIZE idx);
+EXTERNRT OSBOOL rtxCtxtPopArrayElemName (OSCTXT* pctxt);
+
 /**
  * @defgroup llfuns Linked List Utility Functions
  *
